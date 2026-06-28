@@ -9,6 +9,8 @@ const fastify = Fastify({
   logger: true
 });
 
+import { RoomSocket } from './infrastructure/adapters/in/websockets/RoomSocket';
+
 // Registrar Socket.io como plugin de Fastify
 fastify.register(fastifyPlugin(async (fastify) => {
   const io = new Server(fastify.server, {
@@ -20,13 +22,8 @@ fastify.register(fastifyPlugin(async (fastify) => {
 
   fastify.decorate('io', io);
 
-  io.on('connection', (socket) => {
-    fastify.log.info(`Nuevo cliente conectado: ${socket.id}`);
-    
-    socket.on('disconnect', () => {
-      fastify.log.info(`Cliente desconectado: ${socket.id}`);
-    });
-  });
+  // Le pasamos el control a nuestro Adaptador Hexagonal de WebSockets
+  new RoomSocket(io);
 }));
 
 import { setupRoutes } from './infrastructure/adapters/in/http/routes';
