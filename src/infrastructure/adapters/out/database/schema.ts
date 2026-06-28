@@ -6,7 +6,8 @@ import {
   timestamp, 
   pgEnum, 
   primaryKey, 
-  text 
+  text,
+  boolean
 } from 'drizzle-orm/pg-core';
 
 // Enums
@@ -52,6 +53,8 @@ export const rooms = pgTable('rooms', {
   hostId: uuid('host_id').references(() => users.id).notNull(),
   inviteCode: varchar('invite_code', { length: 50 }).notNull().unique(),
   theme: varchar('theme', { length: 100 }).default('default').notNull(),
+  maxParticipants: integer('max_participants').default(10).notNull(),
+  isPublic: boolean('is_public').default(true).notNull(),
 });
 
 // 5. Room Participants

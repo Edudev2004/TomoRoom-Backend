@@ -16,13 +16,14 @@ export class CreateRoomUseCase implements ICreateRoomUseCase {
     // Generamos un código de invitación aleatorio (ej. 6 caracteres)
     const inviteCode = crypto.randomBytes(3).toString('hex').toUpperCase(); 
     
-    // 2. Creamos la Entidad (El Ingrediente crudo)
     const newRoom = new Room(
       roomId,
       command.name,
       command.hostId,
       inviteCode,
-      'default'
+      'default',
+      command.maxParticipants ?? 10,
+      command.isPublic ?? true
     );
 
     // 3. Le decimos al Ayudante que lo guarde en la Despensa (Supabase)

@@ -15,6 +15,8 @@ export class RoomRepository implements IRoomRepository {
       hostId: room.hostId,
       inviteCode: room.inviteCode,
       theme: room.theme,
+      maxParticipants: room.maxParticipants,
+      isPublic: room.isPublic,
     });
   }
 
@@ -32,7 +34,23 @@ export class RoomRepository implements IRoomRepository {
       data.name,
       data.hostId,
       data.inviteCode,
-      data.theme
+      data.theme,
+      data.maxParticipants,
+      data.isPublic
     );
+  }
+
+  async findByHostId(hostId: string): Promise<Room[]> {
+    const result = await db.select().from(rooms).where(eq(rooms.hostId, hostId));
+    
+    return result.map(data => new Room(
+      data.id,
+      data.name,
+      data.hostId,
+      data.inviteCode,
+      data.theme,
+      data.maxParticipants,
+      data.isPublic
+    ));
   }
 }

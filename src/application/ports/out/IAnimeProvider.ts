@@ -10,4 +10,7 @@ export interface AnimeSearchResult {
 export interface IAnimeProvider {
   search(query: string): Promise<AnimeSearchResult[]>;
   getCatalog(page: number, genre?: string): Promise<AnimeSearchResult[]>;
+  getAnimeInfo(url: string): Promise<any>;
+  getEpisodeLinks(url: string): Promise<any>;
+  resolveStream(urls: string[]): Promise<any>;
 }

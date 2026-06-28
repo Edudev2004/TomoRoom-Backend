@@ -6,7 +6,9 @@ export class Room {
     public name: string,
     public hostId: string,
     public inviteCode: string,
-    public theme: string = 'default'
+    public theme: string = 'default',
+    public maxParticipants: number = 10,
+    public isPublic: boolean = true
   ) {}
 
   // Lógica de negocio (pura, sin dependencias externas)
