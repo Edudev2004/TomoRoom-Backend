@@ -112,6 +112,33 @@ export class RoomSocket {
         }
       });
 
+      // Evento 1.6: Cerrar Sala (Borrarla)
+      socket.on('close_room', async (roomId: string) => {
+        const roomMembers = activeRooms.get(roomId) || [];
+        const host = roomMembers.find(m => m.id === userId && m.role === 'host');
+        
+        if (host) {
+          try {
+            // Eliminar la sala de la base de datos
+            await db.delete(rooms).where(eq(rooms.id, roomId));
+            
+            // Notificar a todos en la sala que ha sido cerrada
+            this.io.to(roomId).emit('room_closed');
+            
+            // Limpiar memoria
+            activeRooms.delete(roomId);
+            activeReadyChecks.delete(roomId);
+            
+            // Hacer que todos los sockets abandonen la sala
+            const socketsInRoom = await this.io.in(roomId).fetchSockets();
+            socketsInRoom.forEach(s => s.leave(roomId));
+            
+          } catch (error) {
+            console.error("Error al cerrar la sala:", error);
+          }
+        }
+      });
+
       // Evento 2: Sincronizar Video (Play, Pause, Seek)
       socket.on('sync_video', (data: { roomId: string, action: string, time: number }) => {
         // Retransmitimos la orden a todos en la sala EXCEPTO al que la envió

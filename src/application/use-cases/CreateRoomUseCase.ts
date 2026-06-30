@@ -22,6 +22,7 @@ export class CreateRoomUseCase implements ICreateRoomUseCase {
       command.hostId,
       inviteCode,
       'default',
+      command.image || null,
       command.maxParticipants ?? 10,
       command.isPublic ?? true
     );

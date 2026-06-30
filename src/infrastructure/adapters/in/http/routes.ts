@@ -18,6 +18,7 @@ import { RegisterUserUseCase } from '../../../../application/use-cases/RegisterU
 import { LoginUserUseCase } from '../../../../application/use-cases/LoginUserUseCase';
 import { CreateRoomUseCase } from '../../../../application/use-cases/CreateRoomUseCase';
 import { GetUserRoomsUseCase } from '../../../../application/use-cases/GetUserRoomsUseCase';
+import { UpdateRoomUseCase } from '../../../../application/use-cases/UpdateRoomUseCase';
 import { SearchAnimeUseCase } from '../../../../application/use-cases/SearchAnimeUseCase';
 import { GetCatalogUseCase } from '../../../../application/use-cases/GetCatalogUseCase';
 import { ManageFriendsUseCase } from '../../../../application/use-cases/ManageFriendsUseCase';
@@ -36,13 +37,14 @@ export async function setupRoutes(fastify: FastifyInstance) {
   const loginUserUseCase = new LoginUserUseCase(userRepository);
   const createRoomUseCase = new CreateRoomUseCase(roomRepository);
   const getUserRoomsUseCase = new GetUserRoomsUseCase(roomRepository);
+  const updateRoomUseCase = new UpdateRoomUseCase(roomRepository);
   const searchAnimeUseCase = new SearchAnimeUseCase(animeProvider);
   const getCatalogUseCase = new GetCatalogUseCase(animeProvider);
   const manageFriendsUseCase = new ManageFriendsUseCase(friendRepository, userRepository);
 
   // 3. Instanciamos los Meseros (Controladores) pasándoles los Chefs
   const authController = new AuthController(registerUserUseCase, loginUserUseCase);
-  const roomController = new RoomController(createRoomUseCase, getUserRoomsUseCase);
+  const roomController = new RoomController(createRoomUseCase, getUserRoomsUseCase, updateRoomUseCase);
   const animeController = new AnimeController(searchAnimeUseCase, getCatalogUseCase);
   const movieController = new MovieController(movieProvider);
   const friendController = new FriendController(manageFriendsUseCase);
@@ -74,6 +76,10 @@ export async function setupRoutes(fastify: FastifyInstance) {
       if (!req.body) req.body = {};
       (req.body as any).hostId = req.user?.id;
       return roomController.create(req, res);
+    });
+
+    privateRoutes.put('/api/rooms/:id', async (req, res) => {
+      return roomController.update(req, res);
     });
 
     // Rutas de Anime

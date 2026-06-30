@@ -6,6 +6,6 @@ export interface IRoomRepository {
   save(room: Room): Promise<void>;
   // Y saber buscarla por ID
   findById(id: string): Promise<Room | null>;
-  // Buscar las salas creadas por un host
   findByHostId(hostId: string): Promise<Room[]>;
+  update(room: Room): Promise<void>;
 }

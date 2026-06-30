@@ -15,6 +15,7 @@ export class RoomRepository implements IRoomRepository {
       hostId: room.hostId,
       inviteCode: room.inviteCode,
       theme: room.theme,
+      image: room.image,
       maxParticipants: room.maxParticipants,
       isPublic: room.isPublic,
     });
@@ -35,6 +36,7 @@ export class RoomRepository implements IRoomRepository {
       data.hostId,
       data.inviteCode,
       data.theme,
+      data.image,
       data.maxParticipants,
       data.isPublic
     );
@@ -49,8 +51,18 @@ export class RoomRepository implements IRoomRepository {
       data.hostId,
       data.inviteCode,
       data.theme,
+      data.image,
       data.maxParticipants,
-      data.isPublic
     ));
+  }
+
+  async update(room: Room): Promise<void> {
+    await db.update(rooms).set({
+      name: room.name,
+      image: room.image,
+      maxParticipants: room.maxParticipants,
+      isPublic: room.isPublic,
+      theme: room.theme,
+    }).where(eq(rooms.id, room.id));
   }
 }

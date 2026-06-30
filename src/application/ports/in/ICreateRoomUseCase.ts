@@ -4,6 +4,7 @@ import { Room } from '../../../domain/Room';
 export interface CreateRoomCommand {
   name: string;
   hostId: string;
+  image?: string;
   maxParticipants?: number;
   isPublic?: boolean;
 }

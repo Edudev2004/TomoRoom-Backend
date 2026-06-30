@@ -1,6 +1,7 @@
 // src/infrastructure/adapters/in/http/RoomController.ts
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ICreateRoomUseCase } from '../../../../application/ports/in/ICreateRoomUseCase';
+import { IUpdateRoomUseCase } from '../../../../application/ports/in/IUpdateRoomUseCase';
 import { GetUserRoomsUseCase } from '../../../../application/use-cases/GetUserRoomsUseCase';
 import { db } from '../../out/database/index';
 import { rooms, users } from '../../out/database/schema';
@@ -9,16 +10,18 @@ import { eq, desc } from 'drizzle-orm';
 export class RoomController {
   constructor(
     private readonly createRoomUseCase: ICreateRoomUseCase,
-    private readonly getUserRoomsUseCase: GetUserRoomsUseCase
+    private readonly getUserRoomsUseCase: GetUserRoomsUseCase,
+    private readonly updateRoomUseCase: IUpdateRoomUseCase
   ) {}
 
   async create(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const { name, hostId, maxParticipants, isPublic } = request.body as any;
+      const { name, hostId, maxParticipants, isPublic, image } = request.body as any;
       
       const room = await this.createRoomUseCase.execute({ 
         name, 
         hostId,
+        image,
         maxParticipants: maxParticipants ? parseInt(maxParticipants) : undefined,
         isPublic: isPublic !== undefined ? Boolean(isPublic) : undefined
       });
@@ -31,6 +34,32 @@ export class RoomController {
       return reply.status(400).send({
         success: false,
         message: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async update(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { id } = request.params as any;
+      const hostId = (request as any).user?.id;
+      const { name, maxParticipants, isPublic, image } = request.body as any;
+      
+      const room = await this.updateRoomUseCase.execute({
+        roomId: id,
+        hostId,
+        name,
+        image,
+        maxParticipants: maxParticipants !== undefined ? parseInt(maxParticipants) : undefined,
+        isPublic: isPublic !== undefined ? Boolean(isPublic) : undefined
+      });
+      return reply.status(200).send({
+        success: true,
+        data: room,
+      });
+    } catch (error) {
+      return reply.status(400).send({
+        success: false,
+        message: error instanceof Error ? error.message : 'Error al actualizar sala',
       });
     }
   }
@@ -61,6 +90,7 @@ export class RoomController {
       const activeRoomsRaw = await db.select({
         id: rooms.id,
         title: rooms.name,
+        image: rooms.image,
         maxViewers: rooms.maxParticipants,
         host: users.username
       })
@@ -71,7 +101,6 @@ export class RoomController {
       // Agregar campos simulados
       const activeRooms = activeRoomsRaw.map(r => ({
         ...r,
-        image: 'https://cdn.myanimelist.net/images/anime/1015/138006.jpg', // Placeholder de imagen
         episode: 'Contenido Activo',
         viewers: 1, // Simulado, se podría sacar de sockets si tuviéramos acceso aquí
         isLive: true

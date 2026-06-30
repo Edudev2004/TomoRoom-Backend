@@ -7,6 +7,7 @@ export class Room {
     public hostId: string,
     public inviteCode: string,
     public theme: string = 'default',
+    public image: string | null = null,
     public maxParticipants: number = 10,
     public isPublic: boolean = true
   ) {}
